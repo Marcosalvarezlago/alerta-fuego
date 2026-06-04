@@ -2,17 +2,25 @@ def estimar_distancia(velocidad_avance_m_min, tiempo_min):
     """
     Estima la distancia recorrida por el frente del fuego.
 
+    Parámetros:
     velocidad_avance_m_min: velocidad de avance en metros por minuto
     tiempo_min: tiempo transcurrido en minutos
     """
-    distancia = velocidad_avance_m_min * tiempo_min
-    return distancia
+    return velocidad_avance_m_min * tiempo_min
 
 
-# Prueba inicial
-velocidad = 2.5  # metros por minuto
-tiempo = 30      # minutos
+def main():
+    velocidad = 2.5  # metros por minuto
+    tiempo = 30      # minutos
 
-distancia = estimar_distancia(velocidad, tiempo)
+    distancia = estimar_distancia(velocidad, tiempo)
 
-print("Distancia estimada:", distancia, "metros")
+    print("Modelo inicial de propagación")
+    print("-----------------------------")
+    print("Velocidad de avance:", velocidad, "m/min")
+    print("Tiempo:", tiempo, "min")
+    print("Distancia estimada:", distancia, "m")
+
+
+if __name__ == "__main__":
+    main()
