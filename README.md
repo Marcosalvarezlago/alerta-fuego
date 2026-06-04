@@ -1,0 +1,1 @@
+Proyecto inicial para estimar la propagación de un incendio a partir de viento, pendiente y combustible.
