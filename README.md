@@ -1,6 +1,21 @@
-Proyecto inicial para estimar la propagación de un incendio a partir de viento, pendiente y combustible.
+# Alerta Fuego
 
-## Estado actual
+Prototipo experimental de apoyo ciudadano para estimar, de forma orientativa, el riesgo de alcance de un incendio forestal a una finca o zona vulnerable.
 
-Repositorio creado y conectado con GitHub.
-Primera versión mínima del modelo en desarrollo.
+## Estado del proyecto
+
+Versión inicial demostrativa.
+
+El objetivo actual es reproducir de forma digital el modelo documental base del grupo Alerta Fuego, sin modificar todavía sus supuestos principales.
+
+## Modelo usado
+
+La aplicación sigue el esquema:
+
+1. Localización del incendio.
+2. Localización de la finca o zona vulnerable.
+3. Evaluación de cuadrantes según dirección del viento.
+4. Estimación de velocidad de propagación:
+
+```text
+VPIF = V0 · FV · FP
