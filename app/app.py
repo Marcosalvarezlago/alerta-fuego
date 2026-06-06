@@ -9,6 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_DIR))
 
 from src.modelo import evaluar_alerta_fuego, DIRECCIONES_GRADOS
+from src.meteo import obtener_viento_actual_open_meteo
 
 
 COMBUSTIBLES = {
@@ -28,6 +29,8 @@ DIRECCIONES_VIENTO = {
     "Hacia el oeste ←": "O",
     "Hacia el noroeste ↖": "NO",
 }
+
+CODIGO_A_LABEL_DIRECCION = {valor: clave for clave, valor in DIRECCIONES_VIENTO.items()}
 
 
 def calcular_punto_desde_origen(lat, lon, direccion_grados, distancia_m):
@@ -283,12 +286,53 @@ lon_zona = st.number_input(
     format="%.6f",
 )
 
+
 st.markdown("## 3. Viento, combustible y pendiente")
+
+usar_viento_automatico = st.checkbox(
+    "Usar viento automático desde Open-Meteo",
+    value=False,
+)
+
+direccion_viento_auto = None
+velocidad_viento_auto = None
+meteo_info = None
+
+if usar_viento_automatico:
+    try:
+        meteo_info = obtener_viento_actual_open_meteo(lat_fuego, lon_fuego)
+
+        velocidad_viento_auto = int(round(meteo_info["velocidad_kmh"]))
+        direccion_viento_auto = meteo_info["direccion_hacia_cardinal"]
+
+        st.success(
+            f"Viento automático obtenido: {velocidad_viento_auto} km/h, "
+            f"empujando hacia {direccion_viento_auto}."
+        )
+
+        with st.expander("Ver datos meteorológicos brutos"):
+            st.write("Velocidad:", meteo_info["velocidad_kmh"], "km/h")
+            st.write("Dirección meteorológica desde:", meteo_info["direccion_desde_grados"], "°")
+            st.write("Dirección operativa hacia:", meteo_info["direccion_hacia_grados"], "°")
+            st.write("Dirección cardinal hacia:", meteo_info["direccion_hacia_cardinal"])
+
+    except Exception as error:
+        st.error("No se pudo obtener el viento automático. Usa entrada manual.")
+        st.write(error)
+        usar_viento_automatico = False
+
+
+if usar_viento_automatico and direccion_viento_auto in CODIGO_A_LABEL_DIRECCION:
+    direccion_default_label = CODIGO_A_LABEL_DIRECCION[direccion_viento_auto]
+else:
+    direccion_default_label = "Hacia el nordeste ↗"
+
+direccion_default_index = list(DIRECCIONES_VIENTO.keys()).index(direccion_default_label)
 
 direccion_viento_label = st.selectbox(
     "Dirección hacia la que empuja el viento",
     list(DIRECCIONES_VIENTO.keys()),
-    index=1,
+    index=direccion_default_index,
     help="Usamos la dirección hacia la que el viento empuja el fuego, no de dónde viene.",
 )
 
@@ -298,7 +342,7 @@ velocidad_viento_kmh = st.slider(
     "Velocidad del viento (km/h)",
     min_value=0,
     max_value=80,
-    value=20,
+    value=velocidad_viento_auto if velocidad_viento_auto is not None else 20,
     step=1,
 )
 
@@ -423,6 +467,15 @@ if st.button("Calcular alerta"):
     with st.expander("Ver detalles técnicos del cálculo"):
         st.write("Dirección seleccionada:", direccion_viento_label)
         st.write("Código interno de viento:", direccion_viento_hacia)
+        st.write("Velocidad del viento usada:", velocidad_viento_kmh, "km/h")
+
+        if meteo_info is not None:
+            st.write("Fuente viento: Open-Meteo")
+            st.write("Dirección meteorológica desde:", meteo_info["direccion_desde_grados"], "°")
+            st.write("Dirección operativa hacia:", meteo_info["direccion_hacia_grados"], "°")
+        else:
+            st.write("Fuente viento: entrada manual")
+
         st.write("Dirección incendio → zona vulnerable:", round(resultado["direccion_fuego_zona_grados"], 1), "°")
         st.write("Dirección del viento:", resultado["direccion_viento_grados"], "°")
         st.write("Diferencia angular:", round(resultado["diferencia_signed_grados"], 1), "°")
