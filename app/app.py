@@ -2,11 +2,13 @@ import streamlit as st
 import sys
 from pathlib import Path
 import pandas as pd
+import pydeck as pdk
+import math
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_DIR))
 
-from src.modelo import evaluar_alerta_fuego
+from src.modelo import evaluar_alerta_fuego, DIRECCIONES_GRADOS
 
 
 COMBUSTIBLES = {
@@ -26,6 +28,194 @@ DIRECCIONES_VIENTO = {
     "Hacia el oeste ←": "O",
     "Hacia el noroeste ↖": "NO",
 }
+
+
+def calcular_punto_desde_origen(lat, lon, direccion_grados, distancia_m):
+    radio_tierra_m = 6371000
+
+    angulo = math.radians(direccion_grados)
+    lat_rad = math.radians(lat)
+    lon_rad = math.radians(lon)
+
+    nueva_lat = math.asin(
+        math.sin(lat_rad) * math.cos(distancia_m / radio_tierra_m)
+        + math.cos(lat_rad) * math.sin(distancia_m / radio_tierra_m) * math.cos(angulo)
+    )
+
+    nueva_lon = lon_rad + math.atan2(
+        math.sin(angulo) * math.sin(distancia_m / radio_tierra_m) * math.cos(lat_rad),
+        math.cos(distancia_m / radio_tierra_m) - math.sin(lat_rad) * math.sin(nueva_lat),
+    )
+
+    return math.degrees(nueva_lat), math.degrees(nueva_lon)
+
+
+def crear_sector(lat, lon, direccion_central, apertura_grados, radio_m, pasos=12):
+    angulo_inicio = direccion_central - apertura_grados / 2
+    angulo_fin = direccion_central + apertura_grados / 2
+
+    puntos = [[lon, lat]]
+
+    for i in range(pasos + 1):
+        angulo = angulo_inicio + (angulo_fin - angulo_inicio) * i / pasos
+        punto_lat, punto_lon = calcular_punto_desde_origen(
+            lat,
+            lon,
+            angulo,
+            radio_m,
+        )
+        puntos.append([punto_lon, punto_lat])
+
+    puntos.append([lon, lat])
+
+    return puntos
+
+
+def mostrar_mapa_con_cuadrantes(
+    lat_fuego,
+    lon_fuego,
+    lat_zona,
+    lon_zona,
+    direccion_viento_hacia,
+    radio_cuadrantes_m,
+):
+    direccion_grados = DIRECCIONES_GRADOS[direccion_viento_hacia]
+
+    lat_viento_fin, lon_viento_fin = calcular_punto_desde_origen(
+        lat_fuego,
+        lon_fuego,
+        direccion_grados,
+        radio_cuadrantes_m,
+    )
+
+    sectores_df = pd.DataFrame(
+        [
+            {
+                "nombre": "Cuadrante de riesgo",
+                "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados, 90, radio_cuadrantes_m),
+                "color": [255, 0, 0, 80],
+            },
+            {
+                "nombre": "Cuadrante de alerta",
+                "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados + 90, 90, radio_cuadrantes_m),
+                "color": [255, 180, 0, 65],
+            },
+            {
+                "nombre": "Cuadrante de alerta",
+                "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados - 90, 90, radio_cuadrantes_m),
+                "color": [255, 180, 0, 65],
+            },
+            {
+                "nombre": "Cuadrante sin riesgo directo",
+                "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados + 180, 90, radio_cuadrantes_m),
+                "color": [0, 180, 90, 55],
+            },
+        ]
+    )
+
+    puntos_df = pd.DataFrame(
+        [
+            {
+                "lat": lat_fuego,
+                "lon": lon_fuego,
+                "nombre": "Incendio",
+                "color": [255, 60, 0],
+            },
+            {
+                "lat": lat_zona,
+                "lon": lon_zona,
+                "nombre": "Zona vulnerable",
+                "color": [0, 90, 255],
+            },
+        ]
+    )
+
+    linea_finca_df = pd.DataFrame(
+        [
+            {
+                "from_lon": lon_fuego,
+                "from_lat": lat_fuego,
+                "to_lon": lon_zona,
+                "to_lat": lat_zona,
+                "nombre": "Incendio → zona vulnerable",
+                "color": [255, 230, 0],
+            }
+        ]
+    )
+
+    viento_df = pd.DataFrame(
+        [
+            {
+                "from_lon": lon_fuego,
+                "from_lat": lat_fuego,
+                "to_lon": lon_viento_fin,
+                "to_lat": lat_viento_fin,
+                "nombre": "Dirección del viento",
+                "color": [255, 0, 0],
+            }
+        ]
+    )
+
+    sectores_layer = pdk.Layer(
+        "PolygonLayer",
+        data=sectores_df,
+        get_polygon="polygon",
+        get_fill_color="color",
+        get_line_color=[80, 80, 80],
+        line_width_min_pixels=1,
+        pickable=True,
+        stroked=True,
+        filled=True,
+    )
+
+    punto_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=puntos_df,
+        get_position="[lon, lat]",
+        get_fill_color="color",
+        get_radius=70,
+        pickable=True,
+    )
+
+    linea_finca_layer = pdk.Layer(
+        "LineLayer",
+        data=linea_finca_df,
+        get_source_position="[from_lon, from_lat]",
+        get_target_position="[to_lon, to_lat]",
+        get_color="color",
+        get_width=5,
+        pickable=True,
+    )
+
+    viento_layer = pdk.Layer(
+        "LineLayer",
+        data=viento_df,
+        get_source_position="[from_lon, from_lat]",
+        get_target_position="[to_lon, to_lat]",
+        get_color="color",
+        get_width=8,
+        pickable=True,
+    )
+
+    view_state = pdk.ViewState(
+        latitude=(lat_fuego + lat_zona) / 2,
+        longitude=(lon_fuego + lon_zona) / 2,
+        zoom=12,
+        pitch=0,
+    )
+
+    deck = pdk.Deck(
+        layers=[
+            sectores_layer,
+            linea_finca_layer,
+            viento_layer,
+            punto_layer,
+        ],
+        initial_view_state=view_state,
+        tooltip={"text": "{nombre}"},
+    )
+
+    st.pydeck_chart(deck)
 
 
 st.set_page_config(
@@ -93,27 +283,7 @@ lon_zona = st.number_input(
     format="%.6f",
 )
 
-st.markdown("## 3. Vista rápida en mapa")
-
-mapa_df = pd.DataFrame(
-    [
-        {"lat": lat_fuego, "lon": lon_fuego, "punto": "Incendio"},
-        {"lat": lat_zona, "lon": lon_zona, "punto": "Zona vulnerable"},
-    ]
-)
-
-st.map(
-    mapa_df,
-    latitude="lat",
-    longitude="lon",
-    zoom=12,
-)
-
-st.caption(
-    "El mapa muestra los dos puntos introducidos. En esta versión todavía no dibuja cuadrantes ni frente de avance."
-)
-
-st.markdown("## 4. Viento, combustible y pendiente")
+st.markdown("## 3. Viento, combustible y pendiente")
 
 direccion_viento_label = st.selectbox(
     "Dirección hacia la que empuja el viento",
@@ -155,6 +325,30 @@ sentido_ladera = st.selectbox(
         "llano",
         "bajando",
     ],
+)
+
+st.markdown("## 4. Vista en mapa")
+
+radio_cuadrantes_m = st.slider(
+    "Radio visual de los cuadrantes (m)",
+    min_value=500,
+    max_value=5000,
+    value=1500,
+    step=100,
+)
+
+mostrar_mapa_con_cuadrantes(
+    lat_fuego=lat_fuego,
+    lon_fuego=lon_fuego,
+    lat_zona=lat_zona,
+    lon_zona=lon_zona,
+    direccion_viento_hacia=direccion_viento_hacia,
+    radio_cuadrantes_m=radio_cuadrantes_m,
+)
+
+st.caption(
+    "Rojo transparente: cuadrante de riesgo. Amarillo: cuadrantes de alerta. Verde: cuadrante sin riesgo directo. "
+    "Punto rojo: incendio. Punto azul: zona vulnerable. Línea amarilla: incendio → zona vulnerable. Línea roja: viento."
 )
 
 st.markdown("---")
