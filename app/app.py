@@ -34,6 +34,413 @@ DIRECCIONES_VIENTO = {
 CODIGO_A_LABEL_DIRECCION = {valor: clave for clave, valor in DIRECCIONES_VIENTO.items()}
 
 
+# -----------------------------------------------------------------------------
+# Estilos visuales
+# -----------------------------------------------------------------------------
+
+def inyectar_estilos():
+    st.markdown(
+        """
+        <style>
+        :root {
+            --af-bg: #0f172a;
+            --af-bg-soft: #1e293b;
+            --af-card: #ffffff;
+            --af-text: #0f172a;
+            --af-muted: #64748b;
+            --af-border: #e2e8f0;
+            --af-red: #dc2626;
+            --af-red-soft: #fee2e2;
+            --af-amber: #d97706;
+            --af-amber-soft: #fef3c7;
+            --af-green: #059669;
+            --af-green-soft: #d1fae5;
+            --af-blue: #2563eb;
+            --af-blue-soft: #dbeafe;
+            --af-slate-soft: #f8fafc;
+        }
+
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 3rem;
+            max-width: 1120px;
+        }
+
+        div[data-testid="stVerticalBlock"] > div:has(.af-hero) {
+            gap: 0.6rem;
+        }
+
+        .af-hero {
+            background: linear-gradient(135deg, #111827 0%, #7f1d1d 55%, #ea580c 100%);
+            border-radius: 22px;
+            padding: 28px 30px;
+            color: white;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+            margin-bottom: 12px;
+        }
+
+        .af-kicker {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.86;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .af-hero h1 {
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.1rem);
+            line-height: 1.05;
+            font-weight: 850;
+        }
+
+        .af-hero p {
+            margin: 12px 0 0 0;
+            font-size: 1.05rem;
+            line-height: 1.55;
+            max-width: 820px;
+            opacity: 0.94;
+        }
+
+        .af-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 28px;
+            margin-bottom: 8px;
+        }
+
+        .af-section-title .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: #111827;
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .af-section-title h2 {
+            margin: 0;
+            font-size: 1.45rem;
+            line-height: 1.2;
+        }
+
+        .af-help {
+            border: 1px solid var(--af-border);
+            background: var(--af-slate-soft);
+            border-radius: 16px;
+            padding: 14px 16px;
+            color: #334155;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            margin-bottom: 12px;
+        }
+
+        .af-note {
+            border-left: 5px solid #f97316;
+            background: #fff7ed;
+            color: #7c2d12;
+            border-radius: 12px;
+            padding: 13px 15px;
+            margin: 10px 0 16px 0;
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        .af-card {
+            border: 1px solid var(--af-border);
+            background: white;
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+            margin: 10px 0;
+        }
+
+        .af-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.05rem;
+            color: #0f172a;
+        }
+
+        .af-card p {
+            color: #475569;
+            margin: 0;
+            line-height: 1.45;
+        }
+
+        .af-source-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0 4px 0;
+        }
+
+        .af-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 7px 11px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 0.86rem;
+            font-weight: 650;
+        }
+
+        .af-chip-blue { background: var(--af-blue-soft); color: #1e3a8a; border-color: #bfdbfe; }
+        .af-chip-green { background: var(--af-green-soft); color: #065f46; border-color: #a7f3d0; }
+        .af-chip-amber { background: var(--af-amber-soft); color: #92400e; border-color: #fde68a; }
+
+        .af-status {
+            border-radius: 22px;
+            padding: 22px 24px;
+            margin: 14px 0 18px 0;
+            border: 1px solid;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .af-status .label {
+            font-size: 0.82rem;
+            font-weight: 850;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .af-status .title {
+            font-size: clamp(1.55rem, 4vw, 2.35rem);
+            line-height: 1.1;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .af-status .desc {
+            font-size: 1rem;
+            line-height: 1.5;
+            max-width: 880px;
+        }
+
+        .af-risk { background: var(--af-red-soft); border-color: #fecaca; color: #7f1d1d; }
+        .af-alert { background: var(--af-amber-soft); border-color: #fde68a; color: #78350f; }
+        .af-safe { background: var(--af-green-soft); border-color: #a7f3d0; color: #064e3b; }
+
+        .af-metric-card {
+            border: 1px solid var(--af-border);
+            background: white;
+            border-radius: 18px;
+            padding: 17px 18px;
+            min-height: 112px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.055);
+        }
+
+        .af-metric-label {
+            color: #64748b;
+            font-size: 0.82rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 7px;
+        }
+
+        .af-metric-value {
+            color: #0f172a;
+            font-size: 1.75rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .af-metric-sub {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.35;
+        }
+
+        .af-protocol {
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-top: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .af-protocol h3 {
+            margin: 0 0 10px 0;
+            color: #0f172a;
+            font-size: 1.2rem;
+        }
+
+        .af-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .af-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 10px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            font-size: 0.88rem;
+            color: #334155;
+        }
+
+        .af-dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 999px;
+            flex: 0 0 auto;
+        }
+
+        .af-dot-red { background: #ef4444; }
+        .af-dot-blue { background: #2563eb; }
+        .af-dot-yellow { background: #eab308; }
+        .af-dot-green { background: #10b981; }
+        .af-dot-orange { background: #f59e0b; }
+
+        .af-footer-warning {
+            border-radius: 16px;
+            padding: 16px 18px;
+            background: #111827;
+            color: #f8fafc;
+            margin-top: 18px;
+            line-height: 1.45;
+        }
+
+        .af-footer-warning strong {
+            color: #fed7aa;
+        }
+
+        @media (max-width: 640px) {
+            .af-hero { padding: 22px 20px; border-radius: 18px; }
+            .af-section-title h2 { font-size: 1.22rem; }
+            .af-status { padding: 18px 18px; border-radius: 18px; }
+            .af-metric-value { font-size: 1.45rem; }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def titulo_seccion(numero, titulo, subtitulo=None):
+    st.markdown(
+        f"""
+        <div class="af-section-title">
+            <span class="num">{numero}</span>
+            <h2>{titulo}</h2>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if subtitulo:
+        st.markdown(f'<div class="af-help">{subtitulo}</div>', unsafe_allow_html=True)
+
+
+def tarjeta_metrica(etiqueta, valor, subtitulo):
+    st.markdown(
+        f"""
+        <div class="af-metric-card">
+            <div class="af-metric-label">{etiqueta}</div>
+            <div class="af-metric-value">{valor}</div>
+            <div class="af-metric-sub">{subtitulo}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def chip(texto, clase=""):
+    return f'<span class="af-chip {clase}">{texto}</span>'
+
+
+def mostrar_fuentes(fuente_viento, fuente_combustible, fuente_pendiente):
+    st.markdown(
+        f"""
+        <div class="af-source-row">
+            {chip('Viento: ' + fuente_viento, 'af-chip-blue')}
+            {chip('Combustible: ' + fuente_combustible, 'af-chip-amber')}
+            {chip('Pendiente: ' + fuente_pendiente, 'af-chip-green')}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def mostrar_estado_cuadrante(resultado):
+    cuadrante = resultado["cuadrante"]
+
+    if cuadrante == "riesgo":
+        clase = "af-risk"
+        etiqueta = "Exposición principal"
+        titulo = "Cuadrante de riesgo"
+    elif cuadrante in ["alerta_derecha", "alerta_izquierda"]:
+        clase = "af-alert"
+        etiqueta = "Exposición lateral"
+        titulo = "Cuadrante de alerta"
+    else:
+        clase = "af-safe"
+        etiqueta = "Exposición baja según viento actual"
+        titulo = "Sin riesgo directo"
+
+    st.markdown(
+        f"""
+        <div class="af-status {clase}">
+            <div class="label">{etiqueta}</div>
+            <div class="title">{titulo}</div>
+            <div class="desc">{resultado['descripcion_cuadrante']}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def mostrar_protocolo(resultado):
+    escenario = resultado["escenario"]
+    protocolo = resultado["protocolo"]
+
+    if escenario == "30_min":
+        encabezado = "🚨 Prioridad inmediata"
+    elif escenario in ["1_hora", "alerta_lateral"]:
+        encabezado = "⚠️ Preparación urgente"
+    elif escenario == "1_hora_y_media":
+        encabezado = "🟠 Preparación preventiva"
+    else:
+        encabezado = "🟢 Vigilancia y seguimiento"
+
+    st.markdown(
+        f"""
+        <div class="af-protocol">
+            <h3>{encabezado}: {protocolo['titulo']}</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    for accion in protocolo["acciones"]:
+        st.write(f"- {accion}")
+
+
+def formatear_metros(distancia_m):
+    if distancia_m >= 1000:
+        return f"{distancia_m / 1000:.2f} km"
+    return f"{round(distancia_m)} m"
+
+
+# -----------------------------------------------------------------------------
+# Geometría del mapa
+# -----------------------------------------------------------------------------
+
 def calcular_punto_desde_origen(lat, lon, direccion_grados, distancia_m):
     radio_tierra_m = 6371000
     angulo = math.radians(direccion_grados)
@@ -95,22 +502,22 @@ def mostrar_mapa_con_cuadrantes(
             {
                 "nombre": "Cuadrante de riesgo",
                 "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados, 90, radio_cuadrantes_m),
-                "color": [255, 0, 0, 80],
+                "color": [220, 38, 38, 78],
             },
             {
                 "nombre": "Cuadrante de alerta",
                 "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados + 90, 90, radio_cuadrantes_m),
-                "color": [255, 180, 0, 65],
+                "color": [245, 158, 11, 68],
             },
             {
                 "nombre": "Cuadrante de alerta",
                 "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados - 90, 90, radio_cuadrantes_m),
-                "color": [255, 180, 0, 65],
+                "color": [245, 158, 11, 68],
             },
             {
                 "nombre": "Cuadrante sin riesgo directo",
                 "polygon": crear_sector(lat_fuego, lon_fuego, direccion_grados + 180, 90, radio_cuadrantes_m),
-                "color": [0, 180, 90, 55],
+                "color": [16, 185, 129, 54],
             },
         ]
     )
@@ -121,13 +528,13 @@ def mostrar_mapa_con_cuadrantes(
                 "lat": lat_fuego,
                 "lon": lon_fuego,
                 "nombre": "Incendio",
-                "color": [255, 60, 0],
+                "color": [239, 68, 68],
             },
             {
                 "lat": lat_zona,
                 "lon": lon_zona,
                 "nombre": "Zona vulnerable",
-                "color": [0, 90, 255],
+                "color": [37, 99, 235],
             },
         ]
     )
@@ -140,7 +547,7 @@ def mostrar_mapa_con_cuadrantes(
                 "to_lon": lon_zona,
                 "to_lat": lat_zona,
                 "nombre": "Incendio → zona vulnerable",
-                "color": [255, 230, 0],
+                "color": [234, 179, 8],
             }
         ]
     )
@@ -153,7 +560,7 @@ def mostrar_mapa_con_cuadrantes(
                 "to_lon": lon_viento_fin,
                 "to_lat": lat_viento_fin,
                 "nombre": "Dirección del viento",
-                "color": [255, 0, 0],
+                "color": [220, 38, 38],
             }
         ]
     )
@@ -163,7 +570,7 @@ def mostrar_mapa_con_cuadrantes(
         data=sectores_df,
         get_polygon="polygon",
         get_fill_color="color",
-        get_line_color=[80, 80, 80],
+        get_line_color=[71, 85, 105],
         line_width_min_pixels=1,
         pickable=True,
         stroked=True,
@@ -175,7 +582,7 @@ def mostrar_mapa_con_cuadrantes(
         data=puntos_df,
         get_position="[lon, lat]",
         get_fill_color="color",
-        get_radius=70,
+        get_radius=75,
         pickable=True,
     )
 
@@ -217,21 +624,43 @@ def mostrar_mapa_con_cuadrantes(
         tooltip={"text": "{nombre}"},
     )
 
-    st.pydeck_chart(deck)
+    st.pydeck_chart(deck, use_container_width=True)
 
+
+# -----------------------------------------------------------------------------
+# Interfaz principal
+# -----------------------------------------------------------------------------
 
 st.set_page_config(
     page_title="Alerta Fuego",
     page_icon="🔥",
-    layout="centered",
+    layout="wide",
 )
 
-st.title("🔥 Alerta Fuego")
-st.subheader("Estimación orientativa de riesgo y tiempo de alcance")
+inyectar_estilos()
 
-st.warning(
-    "Herramienta orientativa. No sustituye indicaciones oficiales. "
-    "En caso de peligro, llama al 112."
+st.markdown(
+    """
+    <div class="af-hero">
+        <div class="af-kicker">Demo experimental</div>
+        <h1>🔥 Alerta Fuego</h1>
+        <p>
+        Estimación orientativa de alcance de incendio forestal mediante cuadrantes de exposición,
+        distancia, viento, pendiente y combustible según el modelo base del proyecto.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <div class="af-note">
+        <strong>Uso prudencial:</strong> esta demo no sustituye indicaciones oficiales ni decisiones de emergencia.
+        En caso de peligro, llama al <strong>112</strong> y sigue las instrucciones de los servicios competentes.
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 with st.expander("Cómo obtener coordenadas desde Google Maps"):
@@ -256,37 +685,50 @@ else:
     lon_zona_default = -5.0000
 
 
-st.markdown("## 1. Ubicación del incendio")
+# -----------------------------------------------------------------------------
+# Entradas
+# -----------------------------------------------------------------------------
 
-lat_fuego = st.number_input(
-    "Latitud del incendio",
-    value=lat_fuego_default,
-    format="%.6f",
+titulo_seccion(
+    "1",
+    "Ubicaciones",
+    "Introduce el punto aproximado del incendio y la finca o zona vulnerable que quieres evaluar.",
 )
 
-lon_fuego = st.number_input(
-    "Longitud del incendio",
-    value=lon_fuego_default,
-    format="%.6f",
+col_fuego, col_zona = st.columns(2)
+
+with col_fuego:
+    st.markdown('<div class="af-card"><h3>🔥 Incendio</h3><p>Punto aproximado del frente o conato observado.</p></div>', unsafe_allow_html=True)
+    lat_fuego = st.number_input(
+        "Latitud del incendio",
+        value=lat_fuego_default,
+        format="%.6f",
+    )
+    lon_fuego = st.number_input(
+        "Longitud del incendio",
+        value=lon_fuego_default,
+        format="%.6f",
+    )
+
+with col_zona:
+    st.markdown('<div class="af-card"><h3>🏡 Zona vulnerable</h3><p>Finca, vivienda, corral, núcleo o punto que se desea proteger.</p></div>', unsafe_allow_html=True)
+    lat_zona = st.number_input(
+        "Latitud de la finca o zona vulnerable",
+        value=lat_zona_default,
+        format="%.6f",
+    )
+    lon_zona = st.number_input(
+        "Longitud de la finca o zona vulnerable",
+        value=lon_zona_default,
+        format="%.6f",
+    )
+
+
+titulo_seccion(
+    "2",
+    "Viento",
+    "El viento se interpreta como dirección hacia la que empuja el fuego. Si usas el modo automático, los campos manuales desaparecen.",
 )
-
-
-st.markdown("## 2. Ubicación de la finca o zona vulnerable")
-
-lat_zona = st.number_input(
-    "Latitud de la finca o zona vulnerable",
-    value=lat_zona_default,
-    format="%.6f",
-)
-
-lon_zona = st.number_input(
-    "Longitud de la finca o zona vulnerable",
-    value=lon_zona_default,
-    format="%.6f",
-)
-
-
-st.markdown("## 3. Viento")
 
 usar_viento_automatico = st.checkbox(
     "Usar viento automático desde Open-Meteo",
@@ -308,14 +750,15 @@ if usar_viento_automatico:
         )
         fuente_viento = "Open-Meteo"
 
-        st.success(
-            f"Viento automático obtenido: {velocidad_viento_kmh} km/h, "
-            f"empujando hacia {direccion_viento_hacia}."
-        )
-
-        st.info(
-            "Modo automático activo: los campos manuales de viento se ocultan "
-            "para evitar incoherencias."
+        st.markdown(
+            f"""
+            <div class="af-card">
+                <h3>🌬️ Viento automático activo</h3>
+                <p><strong>{velocidad_viento_kmh} km/h</strong>, empujando hacia <strong>{direccion_viento_hacia}</strong>.</p>
+                <p>Los campos manuales de viento se ocultan para evitar incoherencias.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
         with st.expander("Ver datos meteorológicos brutos"):
@@ -331,27 +774,29 @@ if usar_viento_automatico:
         fuente_viento = "manual"
 
 if not usar_viento_automatico:
-    direccion_viento_label = st.selectbox(
-        "Dirección hacia la que empuja el viento",
-        list(DIRECCIONES_VIENTO.keys()),
-        index=list(DIRECCIONES_VIENTO.keys()).index("Hacia el nordeste ↗"),
-        help="Usamos la dirección hacia la que el viento empuja el fuego, no de dónde viene.",
-    )
+    col_dir, col_vel = st.columns(2)
+    with col_dir:
+        direccion_viento_label = st.selectbox(
+            "Dirección hacia la que empuja el viento",
+            list(DIRECCIONES_VIENTO.keys()),
+            index=list(DIRECCIONES_VIENTO.keys()).index("Hacia el nordeste ↗"),
+            help="Usamos la dirección hacia la que el viento empuja el fuego, no de dónde viene.",
+        )
+        direccion_viento_hacia = DIRECCIONES_VIENTO[direccion_viento_label]
 
-    direccion_viento_hacia = DIRECCIONES_VIENTO[direccion_viento_label]
+    with col_vel:
+        velocidad_viento_kmh = st.slider(
+            "Velocidad del viento (km/h)",
+            min_value=0,
+            max_value=80,
+            value=20,
+            step=1,
+        )
 
-    velocidad_viento_kmh = st.slider(
-        "Velocidad del viento (km/h)",
-        min_value=0,
-        max_value=80,
-        value=20,
-        step=1,
-    )
-
-st.caption(f"Fuente del viento usada en el cálculo: **{fuente_viento}**")
-
-
-st.markdown("## 4. Combustible")
+titulo_seccion(
+    "3",
+    "Combustible",
+)
 
 combustible_legible = st.selectbox(
     "Tipo de combustible dominante",
@@ -360,11 +805,12 @@ combustible_legible = st.selectbox(
 )
 
 tipo_combustible = COMBUSTIBLES[combustible_legible]
+fuente_combustible = "manual"
 
-st.caption("Fuente del combustible usada en el cálculo: **manual**")
-
-
-st.markdown("## 5. Pendiente")
+titulo_seccion(
+    "4",
+    "Pendiente",
+)
 
 usar_pendiente_automatica = st.checkbox(
     "Calcular pendiente automáticamente",
@@ -388,14 +834,15 @@ if usar_pendiente_automatica:
         sentido_ladera = pendiente_auto_info["sentido_ladera"]
         fuente_pendiente = pendiente_auto_info["fuente"]
 
-        st.success(
-            f"Pendiente automática estimada: {round(pendiente_auto_info['pendiente_pct'], 1)} %, "
-            f"sentido: {sentido_ladera}."
-        )
-
-        st.info(
-            "Modo automático activo: los campos manuales de pendiente se ocultan "
-            "para evitar incoherencias."
+        st.markdown(
+            f"""
+            <div class="af-card">
+                <h3>⛰️ Pendiente automática activa</h3>
+                <p><strong>{round(pendiente_auto_info['pendiente_pct'], 1)} %</strong>, sentido: <strong>{sentido_ladera}</strong>.</p>
+                <p>Los campos manuales de pendiente se ocultan para evitar incoherencias.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
         with st.expander("Ver datos de elevación"):
@@ -412,26 +859,28 @@ if usar_pendiente_automatica:
         fuente_pendiente = "manual"
 
 if not usar_pendiente_automatica:
-    pendiente_pct = st.slider(
-        "Pendiente aproximada (%)",
-        min_value=0,
-        max_value=100,
-        value=30,
-        step=1,
-    )
+    col_pen, col_sentido = st.columns(2)
+    with col_pen:
+        pendiente_pct = st.slider(
+            "Pendiente aproximada (%)",
+            min_value=0,
+            max_value=100,
+            value=30,
+            step=1,
+        )
 
-    sentidos = ["subiendo", "llano", "bajando"]
+    with col_sentido:
+        sentidos = ["subiendo", "llano", "bajando"]
+        sentido_ladera = st.selectbox(
+            "Sentido de propagación respecto a la ladera",
+            sentidos,
+            index=sentidos.index("subiendo"),
+        )
 
-    sentido_ladera = st.selectbox(
-        "Sentido de propagación respecto a la ladera",
-        sentidos,
-        index=sentidos.index("subiendo"),
-    )
-
-st.caption(f"Fuente de la pendiente usada en el cálculo: **{fuente_pendiente}**")
-
-
-st.markdown("## 6. Vista en mapa")
+titulo_seccion(
+    "5",
+    "Mapa operativo",
+)
 
 radio_cuadrantes_m = st.slider(
     "Radio visual de los cuadrantes (m)",
@@ -450,14 +899,29 @@ mostrar_mapa_con_cuadrantes(
     radio_cuadrantes_m=radio_cuadrantes_m,
 )
 
-st.caption(
-    "Rojo transparente: cuadrante de riesgo. Amarillo: cuadrantes de alerta. Verde: cuadrante sin riesgo directo. "
-    "Punto rojo: incendio. Punto azul: zona vulnerable. Línea amarilla: incendio → zona vulnerable. Línea roja: viento."
+st.markdown(
+    """
+    <div class="af-legend">
+        <div class="af-legend-item"><span class="af-dot af-dot-red"></span>Incendio / cuadrante de riesgo</div>
+        <div class="af-legend-item"><span class="af-dot af-dot-orange"></span>Cuadrantes de alerta</div>
+        <div class="af-legend-item"><span class="af-dot af-dot-green"></span>Cuadrante sin riesgo directo</div>
+        <div class="af-legend-item"><span class="af-dot af-dot-blue"></span>Zona vulnerable</div>
+        <div class="af-legend-item"><span class="af-dot af-dot-yellow"></span>Línea incendio → zona vulnerable</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 st.markdown("---")
 
-if st.button("Calcular alerta"):
+
+# -----------------------------------------------------------------------------
+# Cálculo y salida visual
+# -----------------------------------------------------------------------------
+
+calcular = st.button("🔥 Calcular alerta", type="primary", use_container_width=True)
+
+if calcular:
     resultado = evaluar_alerta_fuego(
         lat_fuego=lat_fuego,
         lon_fuego=lon_fuego,
@@ -470,65 +934,68 @@ if st.button("Calcular alerta"):
         sentido_ladera=sentido_ladera,
     )
 
-    st.markdown("## 1. Cuadrante de exposición")
+    titulo_seccion("6", "Resultado")
+
+    mostrar_estado_cuadrante(resultado)
 
     cuadrante = resultado["cuadrante"]
+    distancia_texto = formatear_metros(resultado["distancia_m"])
 
     if cuadrante == "riesgo":
-        st.error("CUADRANTE DE RIESGO")
+        tiempo_titulo = resultado["tiempo_llegada_texto"]
+        tiempo_subtitulo = "Estimación principal porque la zona está en el cuadrante de riesgo."
     elif cuadrante in ["alerta_derecha", "alerta_izquierda"]:
-        st.warning("CUADRANTE DE ALERTA")
+        tiempo_titulo = resultado["tiempo_llegada_texto"]
+        tiempo_subtitulo = "Referencia prudencial si el frente deriva lateralmente."
     else:
-        st.success("CUADRANTE SIN RIESGO DIRECTO")
+        tiempo_titulo = "No prioritario"
+        tiempo_subtitulo = "No se muestra como alerta principal con la dirección actual del viento."
 
-    st.write(resultado["descripcion_cuadrante"])
-
-    st.markdown("## 2. Resultado principal")
-
-    st.metric(
-        "Distancia incendio-zona vulnerable",
-        f'{round(resultado["distancia_m"])} m',
-    )
-
-    if cuadrante == "riesgo":
-        st.metric(
-            "Tiempo estimado de alcance",
-            resultado["tiempo_llegada_texto"],
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        tarjeta_metrica(
+            "Distancia",
+            distancia_texto,
+            "Separación entre incendio y zona vulnerable.",
         )
-    elif cuadrante in ["alerta_derecha", "alerta_izquierda"]:
-        st.info(
-            "La zona no está en el cuadrante principal de riesgo, pero sí en alerta lateral. "
-            "El tiempo se muestra solo como referencia prudencial si el frente derivase."
+    with col_b:
+        tarjeta_metrica(
+            "Tiempo",
+            tiempo_titulo,
+            tiempo_subtitulo,
         )
-        st.metric(
-            "Tiempo orientativo",
-            resultado["tiempo_llegada_texto"],
-        )
-    else:
-        st.info(
-            "Según la dirección actual del viento, la zona está fuera del cuadrante directo de riesgo. "
-            "Mantén vigilancia: el viento puede cambiar y las pavesas pueden generar focos secundarios."
+    with col_c:
+        tarjeta_metrica(
+            "VPIF",
+            f"{round(resultado['vpif_m_min'], 1)} m/min",
+            "Velocidad estimada de propagación usada en el cálculo.",
         )
 
-    st.markdown("## 3. Datos usados")
+    st.markdown("### Datos usados")
+    mostrar_fuentes(fuente_viento, fuente_combustible, fuente_pendiente)
 
-    st.write(f"- Fuente del viento: **{fuente_viento}**")
-    st.write(f"- Fuente del combustible: **manual**")
-    st.write(f"- Fuente de la pendiente: **{fuente_pendiente}**")
+    col_d, col_e, col_f = st.columns(3)
+    with col_d:
+        tarjeta_metrica(
+            "Viento",
+            f"{velocidad_viento_kmh} km/h",
+            f"Dirección operativa: {direccion_viento_hacia}.",
+        )
+    with col_e:
+        tarjeta_metrica(
+            "Combustible",
+            combustible_legible,
+            f"V0 = {resultado['v0']} m/min.",
+        )
+    with col_f:
+        tarjeta_metrica(
+            "Pendiente",
+            f"{pendiente_pct} %",
+            f"Sentido: {sentido_ladera}. FP = {resultado['factor_pendiente']}.",
+        )
 
-    st.markdown("## 4. Protocolo orientativo")
-
-    if resultado["escenario"] == "30_min":
-        st.error(resultado["protocolo"]["titulo"])
-    elif resultado["escenario"] in ["1_hora", "alerta_lateral"]:
-        st.warning(resultado["protocolo"]["titulo"])
-    elif resultado["escenario"] == "1_hora_y_media":
-        st.info(resultado["protocolo"]["titulo"])
-    else:
-        st.success(resultado["protocolo"]["titulo"])
-
-    for accion in resultado["protocolo"]["acciones"]:
-        st.write(f"- {accion}")
+    st.markdown("### Protocolo orientativo")
+    mostrar_protocolo(resultado)
 
     with st.expander("Ver detalles técnicos del cálculo"):
         st.write("Dirección seleccionada:", direccion_viento_label)
@@ -541,7 +1008,7 @@ if st.button("Calcular alerta"):
             st.write("Dirección operativa hacia:", meteo_info["direccion_hacia_grados"], "°")
 
         st.write("Combustible seleccionado:", combustible_legible)
-        st.write("Fuente combustible: manual")
+        st.write("Fuente combustible:", fuente_combustible)
 
         st.write("Pendiente usada:", pendiente_pct, "%")
         st.write("Sentido de ladera usado:", sentido_ladera)
@@ -560,8 +1027,13 @@ if st.button("Calcular alerta"):
         st.write("Factor pendiente FP:", resultado["factor_pendiente"])
         st.write("VPIF = V0 · FV · FP:", round(resultado["vpif_m_min"], 2), "m/min")
 
-    st.markdown("---")
-
-    st.warning(
-        "Estimación grosera y orientativa. Úsala para anticiparte, no para apurar los tiempos."
+    st.markdown(
+        """
+        <div class="af-footer-warning">
+            <strong>Recordatorio:</strong> estimación grosera y orientativa. Úsala para anticiparte,
+            retirarte antes y preparar decisiones prudentes, no para apurar tiempos ni justificar
+            entrar o permanecer en zonas comprometidas.
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
