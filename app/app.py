@@ -226,7 +226,6 @@ st.set_page_config(
     layout="centered",
 )
 
-
 st.title("🔥 Alerta Fuego")
 st.subheader("Estimación orientativa de riesgo y tiempo de alcance")
 
@@ -271,6 +270,7 @@ lon_fuego = st.number_input(
     format="%.6f",
 )
 
+
 st.markdown("## 2. Ubicación de la finca o zona vulnerable")
 
 lat_zona = st.number_input(
@@ -293,20 +293,29 @@ usar_viento_automatico = st.checkbox(
     value=False,
 )
 
-direccion_viento_auto = None
-velocidad_viento_auto = None
 meteo_info = None
+fuente_viento = "manual"
 
 if usar_viento_automatico:
     try:
         meteo_info = obtener_viento_actual_open_meteo(lat_fuego, lon_fuego)
 
-        velocidad_viento_auto = int(round(meteo_info["velocidad_kmh"]))
-        direccion_viento_auto = meteo_info["direccion_hacia_cardinal"]
+        velocidad_viento_kmh = int(round(meteo_info["velocidad_kmh"]))
+        direccion_viento_hacia = meteo_info["direccion_hacia_cardinal"]
+        direccion_viento_label = CODIGO_A_LABEL_DIRECCION.get(
+            direccion_viento_hacia,
+            direccion_viento_hacia,
+        )
+        fuente_viento = "Open-Meteo"
 
         st.success(
-            f"Viento automático obtenido: {velocidad_viento_auto} km/h, "
-            f"empujando hacia {direccion_viento_auto}."
+            f"Viento automático obtenido: {velocidad_viento_kmh} km/h, "
+            f"empujando hacia {direccion_viento_hacia}."
+        )
+
+        st.info(
+            "Modo automático activo: los campos manuales de viento se ocultan "
+            "para evitar incoherencias."
         )
 
         with st.expander("Ver datos meteorológicos brutos"):
@@ -319,34 +328,30 @@ if usar_viento_automatico:
         st.error("No se pudo obtener el viento automático. Usa entrada manual.")
         st.write(error)
         usar_viento_automatico = False
+        fuente_viento = "manual"
+
+if not usar_viento_automatico:
+    direccion_viento_label = st.selectbox(
+        "Dirección hacia la que empuja el viento",
+        list(DIRECCIONES_VIENTO.keys()),
+        index=list(DIRECCIONES_VIENTO.keys()).index("Hacia el nordeste ↗"),
+        help="Usamos la dirección hacia la que el viento empuja el fuego, no de dónde viene.",
+    )
+
+    direccion_viento_hacia = DIRECCIONES_VIENTO[direccion_viento_label]
+
+    velocidad_viento_kmh = st.slider(
+        "Velocidad del viento (km/h)",
+        min_value=0,
+        max_value=80,
+        value=20,
+        step=1,
+    )
+
+st.caption(f"Fuente del viento usada en el cálculo: **{fuente_viento}**")
 
 
-if usar_viento_automatico and direccion_viento_auto in CODIGO_A_LABEL_DIRECCION:
-    direccion_default_label = CODIGO_A_LABEL_DIRECCION[direccion_viento_auto]
-else:
-    direccion_default_label = "Hacia el nordeste ↗"
-
-direccion_default_index = list(DIRECCIONES_VIENTO.keys()).index(direccion_default_label)
-
-direccion_viento_label = st.selectbox(
-    "Dirección hacia la que empuja el viento",
-    list(DIRECCIONES_VIENTO.keys()),
-    index=direccion_default_index,
-    help="Usamos la dirección hacia la que el viento empuja el fuego, no de dónde viene.",
-)
-
-direccion_viento_hacia = DIRECCIONES_VIENTO[direccion_viento_label]
-
-velocidad_viento_kmh = st.slider(
-    "Velocidad del viento (km/h)",
-    min_value=0,
-    max_value=80,
-    value=velocidad_viento_auto if velocidad_viento_auto is not None else 20,
-    step=1,
-)
-
-
-st.markdown("## 4. Combustible y pendiente")
+st.markdown("## 4. Combustible")
 
 combustible_legible = st.selectbox(
     "Tipo de combustible dominante",
@@ -356,14 +361,18 @@ combustible_legible = st.selectbox(
 
 tipo_combustible = COMBUSTIBLES[combustible_legible]
 
+st.caption("Fuente del combustible usada en el cálculo: **manual**")
+
+
+st.markdown("## 5. Pendiente")
+
 usar_pendiente_automatica = st.checkbox(
     "Calcular pendiente automáticamente",
     value=False,
 )
 
 pendiente_auto_info = None
-pendiente_default = 30
-sentido_default = "subiendo"
+fuente_pendiente = "manual"
 
 if usar_pendiente_automatica:
     try:
@@ -374,13 +383,19 @@ if usar_pendiente_automatica:
             lon_zona=lon_zona,
         )
 
-        pendiente_default = int(round(pendiente_auto_info["pendiente_pct"]))
-        pendiente_default = max(0, min(100, pendiente_default))
-        sentido_default = pendiente_auto_info["sentido_ladera"]
+        pendiente_pct = int(round(pendiente_auto_info["pendiente_pct"]))
+        pendiente_pct = max(0, min(100, pendiente_pct))
+        sentido_ladera = pendiente_auto_info["sentido_ladera"]
+        fuente_pendiente = pendiente_auto_info["fuente"]
 
         st.success(
             f"Pendiente automática estimada: {round(pendiente_auto_info['pendiente_pct'], 1)} %, "
-            f"sentido: {sentido_default}."
+            f"sentido: {sentido_ladera}."
+        )
+
+        st.info(
+            "Modo automático activo: los campos manuales de pendiente se ocultan "
+            "para evitar incoherencias."
         )
 
         with st.expander("Ver datos de elevación"):
@@ -394,24 +409,29 @@ if usar_pendiente_automatica:
         st.error("No se pudo calcular la pendiente automáticamente. Usa entrada manual.")
         st.write(error)
         usar_pendiente_automatica = False
+        fuente_pendiente = "manual"
 
-pendiente_pct = st.slider(
-    "Pendiente aproximada (%)",
-    min_value=0,
-    max_value=100,
-    value=pendiente_default,
-    step=1,
-)
+if not usar_pendiente_automatica:
+    pendiente_pct = st.slider(
+        "Pendiente aproximada (%)",
+        min_value=0,
+        max_value=100,
+        value=30,
+        step=1,
+    )
 
-sentidos = ["subiendo", "llano", "bajando"]
+    sentidos = ["subiendo", "llano", "bajando"]
 
-sentido_ladera = st.selectbox(
-    "Sentido de propagación respecto a la ladera",
-    sentidos,
-    index=sentidos.index(sentido_default),
-)
+    sentido_ladera = st.selectbox(
+        "Sentido de propagación respecto a la ladera",
+        sentidos,
+        index=sentidos.index("subiendo"),
+    )
 
-st.markdown("## 5. Vista en mapa")
+st.caption(f"Fuente de la pendiente usada en el cálculo: **{fuente_pendiente}**")
+
+
+st.markdown("## 6. Vista en mapa")
 
 radio_cuadrantes_m = st.slider(
     "Radio visual de los cuadrantes (m)",
@@ -490,7 +510,13 @@ if st.button("Calcular alerta"):
             "Mantén vigilancia: el viento puede cambiar y las pavesas pueden generar focos secundarios."
         )
 
-    st.markdown("## 3. Protocolo orientativo")
+    st.markdown("## 3. Datos usados")
+
+    st.write(f"- Fuente del viento: **{fuente_viento}**")
+    st.write(f"- Fuente del combustible: **manual**")
+    st.write(f"- Fuente de la pendiente: **{fuente_pendiente}**")
+
+    st.markdown("## 4. Protocolo orientativo")
 
     if resultado["escenario"] == "30_min":
         st.error(resultado["protocolo"]["titulo"])
@@ -508,21 +534,23 @@ if st.button("Calcular alerta"):
         st.write("Dirección seleccionada:", direccion_viento_label)
         st.write("Código interno de viento:", direccion_viento_hacia)
         st.write("Velocidad del viento usada:", velocidad_viento_kmh, "km/h")
+        st.write("Fuente viento:", fuente_viento)
 
         if meteo_info is not None:
-            st.write("Fuente viento: Open-Meteo")
             st.write("Dirección meteorológica desde:", meteo_info["direccion_desde_grados"], "°")
             st.write("Dirección operativa hacia:", meteo_info["direccion_hacia_grados"], "°")
-        else:
-            st.write("Fuente viento: entrada manual")
+
+        st.write("Combustible seleccionado:", combustible_legible)
+        st.write("Fuente combustible: manual")
+
+        st.write("Pendiente usada:", pendiente_pct, "%")
+        st.write("Sentido de ladera usado:", sentido_ladera)
+        st.write("Fuente pendiente:", fuente_pendiente)
 
         if pendiente_auto_info is not None:
-            st.write("Fuente pendiente:", pendiente_auto_info["fuente"])
             st.write("Elevación incendio:", pendiente_auto_info["elevacion_fuego_m"], "m")
             st.write("Elevación zona:", pendiente_auto_info["elevacion_zona_m"], "m")
             st.write("Desnivel:", round(pendiente_auto_info["desnivel_m"], 2), "m")
-        else:
-            st.write("Fuente pendiente: entrada manual")
 
         st.write("Dirección incendio → zona vulnerable:", round(resultado["direccion_fuego_zona_grados"], 1), "°")
         st.write("Dirección del viento:", resultado["direccion_viento_grados"], "°")
