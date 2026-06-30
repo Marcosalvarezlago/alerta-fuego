@@ -8,6 +8,8 @@ Versión inicial demostrativa.
 
 El objetivo actual es reproducir de forma digital el modelo documental base del grupo Alerta Fuego, sin modificar todavía sus supuestos principales.
 
+Este repositorio contiene una demo experimental no oficial. No incluye datos reales de incendios, fincas ni personas.
+
 ## Modelo usado
 
 La aplicación sigue el esquema:
